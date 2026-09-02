@@ -661,7 +661,15 @@ donatePayBtn.addEventListener('click', async function(){
     last_name: lastName,
     email: email,
     telephone: "972" + rawPhone.replace(/^0/, '').replace(/\D/g,''),
-    currency: 'ILS'
+    currency: 'ILS',
+    // שדות מותאמים אישית של הקמפיין - הקמפיין הזה דורש אותם גם בתוך
+    // האייפריים עצמו, אז מעבירים אותם עם השמות הפנימיים שלהם כדי
+    // שהמסך ידלג עליהם וילך ישר לתשלום, בלי לבקש אותם שוב
+    tz: form.idNumber.value.trim(),
+    shmhmavshpzt: form.patientFirstName.value.trim(),
+    Patientssurname: form.patientLastName.value.trim(),
+    mkhlkh: form.department.value.trim(),
+    msprmshttpym: form.guests.value
   });
 
   const donationSection = document.getElementById('donationStep');
