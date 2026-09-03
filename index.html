@@ -120,6 +120,35 @@
   .pom-row{display:flex;justify-content:center;gap:18px;margin-top:44px;opacity:.85;}
   .pom-row svg{width:34px;height:34px;}
 
+  /* Thank-you page */
+  .thank-you{
+    position:relative;overflow:hidden;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(160deg,var(--maroon) 0%,var(--maroon-dark) 60%);
+    color:#fff;padding:60px 0;
+  }
+  .thank-you::before,.thank-you::after{
+    content:"";position:absolute;border-radius:50%;
+    background:radial-gradient(circle,rgba(230,190,90,.3) 0%,rgba(230,190,90,0) 70%);
+  }
+  .thank-you::before{width:480px;height:480px;top:-200px;right:-140px;}
+  .thank-you::after{width:420px;height:420px;bottom:-200px;left:-120px;}
+  .thank-you-inner{position:relative;z-index:2;text-align:center;max-width:600px;margin:0 auto;}
+  .ty-icon{
+    width:84px;height:84px;border-radius:50%;margin:0 auto 26px;
+    background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.35);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ty-icon svg{width:40px;height:40px;}
+  .thank-you h2{
+    font-size:clamp(26px,4.2vw,38px);font-weight:800;margin:0 0 16px;
+  }
+  .thank-you p{
+    font-size:clamp(15px,2vw,17.5px);color:rgba(255,255,255,.88);
+    margin:0 auto 34px;max-width:480px;font-weight:300;line-height:1.7;
+  }
+  .ty-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
   /* Info cards */
   section.info{padding:72px 0 20px;}
   .section-title{
@@ -295,7 +324,7 @@
   </div>
 </header>
 
-<section class="hero">
+<section class="hero" id="heroSection">
   <div class="wrap hero-inner">
     <span class="eyebrow">✡️ הרשמה לסעודת חג</span>
     <h1>ראש השנה בלב חב"ד בילינסון</h1>
@@ -315,7 +344,7 @@
   </div>
 </section>
 
-<section class="info wrap">
+<section class="info wrap" id="infoSection">
   <h2 class="section-title">מה מחכה לכם</h2>
   <p class="section-sub">כמה מילים על הרוח שאנחנו רוצים ליצור יחד, בלי יותר מדי פרטים - הפרטים המלאים יימסרו לנרשמים.</p>
   <div class="cards">
@@ -464,6 +493,20 @@
   </div>
 </section>
 
+<section class="thank-you" id="thankYouSection" style="display:none;">
+  <div class="wrap thank-you-inner">
+    <div class="ty-icon" id="tyIcon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2 id="tyTitle">נרשמתם בהצלחה!</h2>
+    <p id="tySubtitle">תודה שנרשמתם לסעודת ראש השנה של לב חב"ד בילינסון. נשמח לראותכם ולכל בני המשפחה - שנה טובה ומתוקה!</p>
+    <div class="ty-actions">
+      <button type="button" class="btn-primary" id="tyAddDonationBtn">גם אני רוצה לתרום</button>
+      <button type="button" class="btn-ghost" id="tyRegisterAnotherBtn">רישום נוסף</button>
+    </div>
+  </div>
+</section>
+
 <footer>
   &copy; <span id="year"></span> <strong>לב חב"ד בילינסון</strong> · נבנה באהבה לקראת ראש השנה
 </footer>
@@ -534,11 +577,79 @@ async function registerContact(payload){
   return { ok: true };
 }
 
-function markRegistered(){
+function markRegistered(showThanks){
   isRegistered = true;
   submitBtn.disabled = true;
   submitBtn.textContent = 'נרשמת בהצלחה ✓';
+  if(showThanks !== false) showThankYou('registered');
 }
+
+/* ------------------------------------------------------------
+   דף תודה - מחליף את כל תוכן הדף (לא חלון קופץ), בשני נוסחים:
+   'registered' (נרשם בלבד) ו-'donated' (נרשם + תרם בפועל).
+   ------------------------------------------------------------ */
+const heroSection = document.getElementById('heroSection');
+const infoSection = document.getElementById('infoSection');
+const formSection = document.getElementById('form');
+const thankYouSection = document.getElementById('thankYouSection');
+const tyTitle = document.getElementById('tyTitle');
+const tySubtitle = document.getElementById('tySubtitle');
+const tyAddDonationBtn = document.getElementById('tyAddDonationBtn');
+const tyRegisterAnotherBtn = document.getElementById('tyRegisterAnotherBtn');
+
+const THANK_YOU_TEXT = {
+  registered: {
+    title: 'נרשמתם בהצלחה!',
+    subtitle: 'תודה שנרשמתם לסעודת ראש השנה של לב חב"ד בילינסון. נשמח לראותכם ולכל בני המשפחה - שנה טובה ומתוקה!',
+    showDonateBtn: true
+  },
+  donated: {
+    title: 'תודה רבה מכל הלב!',
+    subtitle: 'התרומה שלכם התקבלה בהצלחה, וההרשמה לסעודה נקלטה יחד איתה. שהזכות תעמוד לכם - שנה טובה ומתוקה!',
+    showDonateBtn: false
+  }
+};
+
+function showThankYou(variant){
+  const t = THANK_YOU_TEXT[variant] || THANK_YOU_TEXT.registered;
+  tyTitle.textContent = t.title;
+  tySubtitle.textContent = t.subtitle;
+  tyAddDonationBtn.style.display = t.showDonateBtn ? '' : 'none';
+
+  heroSection.style.display = 'none';
+  infoSection.style.display = 'none';
+  formSection.style.display = 'none';
+  thankYouSection.style.display = 'flex';
+  window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+}
+
+function hideThankYou(){
+  heroSection.style.display = '';
+  infoSection.style.display = '';
+  formSection.style.display = '';
+  thankYouSection.style.display = 'none';
+}
+
+tyAddDonationBtn.addEventListener('click', function(){
+  hideThankYou();
+  donatePanel.removeAttribute('hidden');
+  donateToggleBtn.setAttribute('aria-expanded', 'true');
+  document.getElementById('donateToggleBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  donationAmountInput.focus();
+});
+
+tyRegisterAnotherBtn.addEventListener('click', function(){
+  form.reset();
+  isRegistered = false;
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'שליחה';
+  msg.className = '';
+  donatePanel.setAttribute('hidden', '');
+  donateToggleBtn.setAttribute('aria-expanded', 'false');
+  document.getElementById('donationStep').style.display = 'none';
+  hideThankYou();
+  formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 form.addEventListener('submit', async function(e){
   e.preventDefault();
@@ -637,7 +748,7 @@ donatePayBtn.addEventListener('click', async function(){
           : 'ההרשמה נשלחה בהצלחה! ממשיכים לתשלום התרומה...',
         'ok'
       );
-      markRegistered();
+      markRegistered(false); // לא מציגים דף תודה עכשיו - ממשיכים ישר לתשלום
     } catch(err){
       console.error(err);
       showDonateHint('משהו השתבש ברישום, אז עדיין לא עברנו לתשלום. אפשר לנסות שוב, או ליצור קשר בטלפון 050-769-0577.');
@@ -662,6 +773,10 @@ donatePayBtn.addEventListener('click', async function(){
     email: email,
     telephone: "972" + rawPhone.replace(/^0/, '').replace(/\D/g,''),
     currency: 'ILS',
+    // אחרי תשלום מוצלח פיץ' תעביר את האייפריים לכתובת הזו על הדומיין
+    // שלנו - וברגע שזה קורה נזהה את זה (ראו listener על donationIframe
+    // למטה) ונציג את דף התודה של "תרם בפועל"
+    redirect_url: location.origin + location.pathname + '?paid=1',
     // שדות מותאמים אישית של הקמפיין - הקמפיין הזה דורש אותם גם בתוך
     // האייפריים עצמו, אז מעבירים אותם עם השמות הפנימיים שלהם כדי
     // שהמסך ידלג עליהם וילך ישר לתשלום, בלי לבקש אותם שוב
@@ -680,6 +795,24 @@ donatePayBtn.addEventListener('click', async function(){
 
   donatePayBtn.disabled = false;
   donatePayBtn.textContent = 'מעבר לתשלום מאובטח';
+});
+
+/* ------------------------------------------------------------
+   זיהוי סיום תשלום: כל עוד האייפריים נמצא באתר של פיץ' (דומיין אחר),
+   הדפדפן חוסם קריאה ל-iframe.contentWindow.location מטעמי אבטחה -
+   וזה בסדר, זה בדיוק מה שקורה כל עוד התשלום לא הושלם. ברגע שפיץ'
+   מפנה את האייפריים בחזרה ל-redirect_url (הדומיין שלנו) - אין יותר
+   חסימה, ואז אפשר לזהות את זה ולהציג את דף התודה של "תרם".
+   ------------------------------------------------------------ */
+document.getElementById('donationIframe').addEventListener('load', function(){
+  try{
+    const iframeUrl = this.contentWindow.location.href;
+    if(iframeUrl.includes('paid=1')){
+      showThankYou('donated');
+    }
+  } catch(err){
+    // עדיין על דומיין של פיץ' - צפוי, לא עושים כלום
+  }
 });
 </script>
 </body>
