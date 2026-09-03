@@ -319,6 +319,7 @@
     <div class="brand">
       <img src="lev-chabad-logo.png" alt="לב חב&quot;ד" class="brand-logo">
       <div class="brand-text">
+        <small>בילינסון · Beilinson</small>
       </div>
     </div>
     <a href="#form" class="btn-nav">להרשמה</a>
@@ -330,6 +331,7 @@
     <img src="lev-chabad-logo.png" alt="לב חב&quot;ד">
   </div>
   <div class="wrap hero-inner">
+    <span class="eyebrow">✡️ הרשמה לסעודת חג</span>
     <h1>ראש השנה בלב חב"ד בילינסון</h1>
     <p class="lead">
       לצד המשפחה, גם כשהיא בבית החולים. השנה שוב נשב יחד לסעודת חג חמה,
@@ -637,6 +639,7 @@ tyAddDonationBtn.addEventListener('click', function(){
   hideThankYou();
   donatePanel.removeAttribute('hidden');
   donateToggleBtn.setAttribute('aria-expanded', 'true');
+  submitBtn.style.display = 'none';
   document.getElementById('donateToggleBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
   donationAmountInput.focus();
 });
@@ -646,6 +649,7 @@ tyRegisterAnotherBtn.addEventListener('click', function(){
   isRegistered = false;
   submitBtn.disabled = false;
   submitBtn.textContent = 'שליחה';
+  submitBtn.style.display = '';
   msg.className = '';
   donatePanel.setAttribute('hidden', '');
   donateToggleBtn.setAttribute('aria-expanded', 'false');
@@ -705,9 +709,13 @@ donateToggleBtn.addEventListener('click', function(){
     donatePanel.removeAttribute('hidden');
     donateToggleBtn.setAttribute('aria-expanded', 'true');
     donationAmountInput.focus();
+    // ברגע שנפתח פאנל התרומה, "שליחה" הרגיל מתבטל - הדרך היחידה
+    // קדימה מכאן היא "מעבר לתשלום מאובטח" (שגם נרשם וגם משלם)
+    submitBtn.style.display = 'none';
   } else {
     donatePanel.setAttribute('hidden', '');
     donateToggleBtn.setAttribute('aria-expanded', 'false');
+    if(!isRegistered) submitBtn.style.display = '';
   }
 });
 
